@@ -1,5 +1,35 @@
 import {Component, Inject, ElementRef, EventEmitter, HostListener} from '@angular/core';
 
+export class DataItem {
+    public productId: number;
+    public productName: string;
+    public supplierId: number;
+    public categoryId: number;
+    public quantityPerUnit: string;
+    public unitPrice: string;
+    public unitsInStock: number;
+    public unitsOnOrder: number;
+    public reOrderLevel: number;
+    public discontinued: boolean;
+    public dateDiscontinued?: Date;
+
+    constructor(data: any) {
+        this.productId = data.ProductID;
+        this.productName = data.ProductName;
+        this.supplierId = data.SupplierID;
+        this.categoryId = data.CategoryID;
+        this.quantityPerUnit = data.QuantityPerUnit;
+        this.unitPrice = data.UnitPrice;
+        this.unitsInStock = data.UnitsInStock;
+        this.unitsOnOrder = data.UnitsOnOrder;
+        this.reOrderLevel = data.ReorderLevel;
+        this.discontinued = data.Discontinued;
+
+        // this line is what appears to be causing the grid to break, if you comment this line out and leave dateDiscontinued as undefined the grid will load again
+        this.dateDiscontinued = new Date();
+    }
+}
+
 declare var jQuery: any;
 @Component({
 	selector: 'my-app',
@@ -12,6 +42,7 @@ export class AppComponent {
 	private cellClickHandler: any;
 	private renderedEventHandler:any;
     private data: Array<any>;
+    private formattedData: Array<DataItem>;
     private id: string = "grid1";
 
 	constructor() {
@@ -618,32 +649,35 @@ export class AppComponent {
         }
         ];
 
-			this.cellClickHandler= function(ui){
-				console.log("grid cell click");
-				
-			};
+        this.formattedData = this.data.map(i => {
+            return new DataItem(i);
+        });
 
-			this.renderedEventHandler= function(ui){
-				console.log("grid is rendered.");
-				
-			};
+        this.cellClickHandler= function(ui){
+            console.log("grid cell click");
+        };
+
+        this.renderedEventHandler= function(ui){
+            console.log("grid is rendered.");
+
+        };
 
 		this.gridOptions = {
-            dataSource: this.data,
+            dataSource: this.formattedData,
             width: "100%",
-            primaryKey: "ProductID",
+            primaryKey: "productID",
             autoCommit: true,
             autoGenerateColumns: false,
             columns: [
-                   { "headerText": "Product ID", "key": "ProductID", "dataType": "number", "width": "10%" },
-                   { "headerText": "Name", "key": "ProductName", "dataType": "string", "width": "40%" },
-                   { "headerText": "Quantity per unit", "key": "QuantityPerUnit", "dataType": "string", "width": "25%" },
-                   { "headerText": "Unit Price", "key": "UnitPrice", "dataType": "string", "width": "25%" }
+                   { "headerText": "Product ID", "key": "productID", "dataType": "number", "width": "10%" },
+                   { "headerText": "Name", "key": "productName", "dataType": "string", "width": "40%" },
+                   { "headerText": "Quantity per unit", "key": "quantityPerUnit", "dataType": "string", "width": "25%" },
+                   { "headerText": "Unit Price", "key": "unitPrice", "dataType": "string", "width": "25%" }
             ],
             features: [{
                 name: "Updating",
                 columnSettings: [{
-                    columnKey: "ProductID",
+                    columnKey: "productID",
                     readOnly: true
                 }]
             }, {
